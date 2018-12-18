@@ -1,0 +1,382 @@
+/*
+	Program: Project 2
+	Author: Elizabeth Wen
+	Class: CSCI140, TTh
+	Date: 10/11/2018
+	Description: This program takes an equation in string format, converts them into int arrays,
+	calculates the final result, and outputs the result in string format
+	I certify that the code below is my work.
+	Exception(s): N/A
+*/
+
+
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+const int MAX_DIGITS = 20;
+int processedDigits = 0;
+
+// Global variables
+string NumberOneInput;
+string NumberTwoInput;
+string Operator;
+
+int FirstNumber[MAX_DIGITS];
+int SecondNumber[MAX_DIGITS];
+int FinalNumber[MAX_DIGITS];
+
+// Function prototypes
+
+void ResetVariables();
+bool ReceiveUserInput(bool& exitFlag);
+bool ValidateUserInputs();
+bool ValidateString(string& NumInput);
+bool ConvertDigitsStringToIntArray(const string& strDigits, int nDigits[]);
+bool ConvertIntArrayToDigitsString(int nDigits[], string& strDigits);
+bool AddTwoIntArrays(int a[], int b[], int c[], int numDigits);
+bool SubtractTwoIntArrays(int a[], int b[], int c[], int numDigits);
+void PrintResult();
+
+int main()
+{
+	bool result = false;
+	bool exitFlag = false;
+
+	int validOperations = 0;
+	cout << "Project 2: Adding/subtracting two integer arrays" << endl;
+	cout << "Version 1 by Elizabeth Wen" << endl;
+
+	do
+	{
+		ResetVariables();
+		exitFlag = false;
+		result = ReceiveUserInput(exitFlag);
+
+		if (!result)
+		{
+			continue;
+		}
+
+		if (exitFlag)
+		{
+			continue;
+		}
+
+		result = ValidateUserInputs();
+
+		if (!result)
+		{
+			continue;
+		}
+
+
+		// If past checks were successful, then convert digit strings to integer arrays
+		result = ConvertDigitsStringToIntArray(NumberOneInput, FirstNumber);
+
+		if (!result)
+		{
+			continue;
+		}
+
+		result = ConvertDigitsStringToIntArray(NumberTwoInput, SecondNumber);
+
+		if (!result)
+		{
+			continue;
+		}
+
+		// Find whether user wants addition or subtraction, and perform correct operation
+		if (Operator == "+")
+		{
+			result = AddTwoIntArrays(FirstNumber, SecondNumber, FinalNumber, processedDigits);
+		}
+		else if (Operator == "-")
+		{
+			result = SubtractTwoIntArrays(FirstNumber, SecondNumber, FinalNumber, processedDigits);
+		}
+
+		if (!result)
+		{
+			continue;
+		}
+
+		// Add one to the number of successful operations
+		validOperations++;
+
+		PrintResult();
+
+		cout << endl;
+
+	} while (!exitFlag);
+
+
+	cout << "There are " << validOperations << " valid operations." << endl;
+	cout << "Thanks for using my program. Good bye!" << endl;
+	system("pause");
+	return 0;
+}
+
+void ResetVariables()
+{
+	processedDigits = 0;
+
+	NumberOneInput = "";
+	NumberTwoInput = "";
+	Operator = "";
+
+	for (int i = 0; i < MAX_DIGITS; i++)
+	{
+		FirstNumber[i] = 0;
+		SecondNumber[i] = 0;
+		FinalNumber[i] = 0;
+	}
+
+}
+
+bool ReceiveUserInput(bool& exitFlag)
+{
+	cin.clear();
+	cin.ignore(cin.rdbuf()->in_avail(), '\n');
+
+	cout << "Enter an expression -->";
+	cin >> NumberOneInput >> Operator >> NumberTwoInput;
+
+	if ((NumberOneInput == "0") && (Operator == "%") && (NumberTwoInput == "0"))
+	{
+		exitFlag = true;
+		return true;
+	}
+	return true;
+}
+
+bool ValidateString(string& NumInput)
+{
+	unsigned int i = 0;
+
+	if (NumberOneInput.length() < 1)
+	{
+		cout << "Error: Invalid operand" << endl << endl;
+		return false;
+	}
+
+	if (NumberOneInput.length() > MAX_DIGITS)
+	{
+		cout << "Error: Invalid operand (too large)" << endl << endl;
+		return false;
+	}
+
+	// Check each character to see if they are numbers
+	for (i = 0; i < (NumInput.length() - 1); i++)
+	{
+		char oneChar = NumInput.at(i);
+		if (!isdigit(oneChar))
+		{
+			cout << "Error: Invalid operand (bad digit)" << endl << endl;
+			return false;
+		}
+	}
+	return true;
+
+}
+
+
+
+
+bool ValidateUserInputs()
+{
+	// Check if operator is '+' or '-'
+	if (Operator == "%")
+	{
+		return false;
+	}
+	else if ((Operator != "+") && (Operator != "-"))
+	{
+		cout << "Error: Invalid operator" << endl << endl;
+		return false;
+	}
+
+
+	bool result = ValidateString(NumberOneInput);
+
+	if (!result)
+	{
+		return false;
+	}
+
+	result = ValidateString(NumberTwoInput);
+
+	if (!result)
+	{
+		return false;
+	}
+
+	// Set value of processed digits
+	if ((NumberTwoInput.length()) > NumberOneInput.length())
+	{
+		processedDigits = NumberTwoInput.length();
+	}
+	else
+	{
+		processedDigits = NumberOneInput.length();
+	}
+
+	return true;
+}
+
+
+bool ConvertDigitsStringToIntArray(const string& strDigits, int nDigits[])
+{
+	int i = 0;
+	int j = 0;
+	for (j = (strDigits.length() - 1); j >= 0; j--)
+	{
+		char oneDigitChar = strDigits.at(j);
+		switch (oneDigitChar)
+		{
+		case '0': nDigits[i++] = 0; break;
+		case '1': nDigits[i++] = 1; break;
+		case '2': nDigits[i++] = 2; break;
+		case '3': nDigits[i++] = 3; break;
+		case '4': nDigits[i++] = 4; break;
+		case '5': nDigits[i++] = 5; break;
+		case '6': nDigits[i++] = 6; break;
+		case '7': nDigits[i++] = 7; break;
+		case '8': nDigits[i++] = 8; break;
+		case '9': nDigits[i++] = 9; break;
+		default:
+			cout << "Error: Invalid operand (bad digit)." << endl << endl;
+			return (false);
+		}
+	}
+
+	return true;
+}
+
+
+bool ConvertIntArrayToDigitsString(int nDigits[], string& strDigits)
+{
+	strDigits = "";
+
+	int i = 0;
+	bool nonZeroDigitFound = false;
+
+	//No need to go the entire MAX_DIGITS.
+	for (i = (MAX_DIGITS - 1); i >= 0; i--)
+	{
+		//Skip the leading 0.
+		if (!nonZeroDigitFound)
+		{
+			if (nDigits[i])
+			{
+				nonZeroDigitFound = true;
+			}
+		}
+
+
+		if (nonZeroDigitFound)
+		{
+			switch (nDigits[i])
+			{
+			case 0: strDigits = strDigits + "0"; break;
+			case 1: strDigits = strDigits + "1"; break;
+			case 2: strDigits = strDigits + "2"; break;
+			case 3: strDigits = strDigits + "3"; break;
+			case 4: strDigits = strDigits + "4"; break;
+			case 5: strDigits = strDigits + "5"; break;
+			case 6: strDigits = strDigits + "6"; break;
+			case 7: strDigits = strDigits + "7"; break;
+			case 8: strDigits = strDigits + "8"; break;
+			case 9:strDigits = strDigits + "9"; break;
+			}
+		}
+	}
+	return true;
+}
+
+
+bool AddTwoIntArrays(int a[], int b[], int c[], int numDigits)
+{
+	int carriedNum = 0;
+	int digitSum = 0;
+	int i;
+
+	for (i = 0; i < numDigits; i++)
+	{
+		digitSum = a[i] + b[i] + carriedNum;
+		carriedNum = 0; //Reset after usage.
+		if (digitSum < 10)
+		{
+			c[i] = digitSum;
+		}
+		else
+		{
+			c[i] = digitSum % 10;
+			carriedNum = 1; //nCarry = digitSum / 10;
+		}
+	}
+
+	//i is now set to numDigits.
+	//If nCarry is set, we need to check for overflow condition.
+	if (carriedNum)
+	{
+		if (numDigits < MAX_DIGITS)
+		{
+			//No overflow. Store the Carry in the result.
+			c[i] = carriedNum;
+		}
+		else
+		{
+			//Overflow occurs. Print the error.
+			cout << "Error: Integer overflow." << endl << endl;
+			return (false);
+		}
+	}
+
+	return (true);
+}
+
+
+bool SubtractTwoIntArrays(int a[], int b[], int c[], int numDigits)
+{
+	bool firstNumSmallerThanSecondNum = false;
+	int borrowedNum = 0;
+	int oneDigit = 0;
+
+	for (int i = 0; i < numDigits; i++)
+	{
+		oneDigit = a[i] - borrowedNum - b[i];
+		borrowedNum = 0; //Reset after usage.
+		if (oneDigit < 0)
+		{
+			//Need to borrow from the next higher-magnitude-order digit.
+			if ((i + 1) < numDigits)
+			{
+				oneDigit = oneDigit + 10;
+				borrowedNum = 1;
+			}
+			else
+			{
+				firstNumSmallerThanSecondNum = true;
+			}
+		}
+
+		if (!firstNumSmallerThanSecondNum)
+		{
+			c[i] = oneDigit;
+		}
+	}
+	return true;
+}
+
+void PrintResult()
+{
+	string finalResult = "";
+
+	bool result = ConvertIntArrayToDigitsString(FinalNumber, finalResult);
+	cout << NumberOneInput << " " << Operator << " " << NumberTwoInput << " = " << finalResult << endl;
+
+}
